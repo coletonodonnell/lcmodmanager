@@ -1,3 +1,4 @@
+use crate::util::path_exists;
 use std::fs::{File, write, remove_file};
 use reqwest::blocking::get;
 use flate2::read::GzDecoder;
@@ -13,10 +14,10 @@ pub struct Steam {
 
 impl Steam {
     pub fn check_bepinex(&self) -> bool {
-        std::fs::try_exists(format!("{0}/BepInEx", self.lc_path)).unwrap()
+        path_exists(format!("{0}/BepInEx", self.lc_path).as_str())
     }
 
-    pub fn create_bepinex(&self) {
+    pub fn install_bepinex(&self) {
         let resp = get(&self.bepinex_download).expect("Could not get file");
         let body = resp.bytes().expect("Could not convert file to bytes");
         write("./lc/BepInEx.tar.gz", body).expect("Could not write BepInEx.tar.gz");
@@ -28,6 +29,7 @@ impl Steam {
 
         remove_file("./lc/BepInEx.tar.gz").expect("Could not remove archive");
 
+        // If this is a flatpak install, we have to run steam via flatpak
         if self.flatpak {
             Command::new(self.run_command.as_str())
                         .args(["run", "com.valvesoftware.Steam", "steam://rungameid/1966720"])
@@ -40,7 +42,7 @@ impl Steam {
                         .expect("Could not run Lethal Company");
         }
 
-        while !std::fs::try_exists(format!("{0}/BepInEx/plugins", self.lc_path)).unwrap() {
+        while !path_exists(format!("{0}/BepInEx/plugins", self.lc_path).as_str()) {
             std::thread::sleep(std::time::Duration::from_millis(100));
         }
     }
