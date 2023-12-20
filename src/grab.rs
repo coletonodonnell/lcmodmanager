@@ -50,8 +50,7 @@ impl Grab {
         let plugin_file = format!("{0}/BepInEx/plugins/{1}", &self.lc_path, &client_plugin.dll_name);
         if path_exists(&plugin_file) {
             remove_file(&plugin_file)
-                .expect(format!("Could not delete plugin: {0}", &client_plugin.dll_name)
-                .as_str())
+                .expect(&format!("Could not delete plugin: {0}", &client_plugin.dll_name))
         }
 
         // If there are folders, search for them and delete them 
@@ -60,8 +59,7 @@ impl Grab {
                 let plugin_dir = format!("{0}/BepInEx/plugins/{1}", &self.lc_path, &folder);
                 if path_exists(&plugin_dir) {
                     remove_dir_all(&plugin_dir)
-                    .expect(format!("Could not remove plugin folder: {0}", &folder)
-                    .as_str());
+                    .expect(&format!("Could not remove plugin folder: {0}", &folder));
                 }
             }
         }
@@ -74,11 +72,10 @@ impl Grab {
         let body = resp.bytes().expect("Could not convert file to bytes");
         let plugin_tar_file = format!("./lc/{0}", server_plugin.tar_name);
         write(&plugin_tar_file, body)
-            .expect(format!("Could not write {0}", server_plugin.tar_name)
-            .as_str());
+            .expect(&format!("Could not write {0}", server_plugin.tar_name));
 
         // Process the sha256sum so as to validate integrity
-        let downloaded_plugin_tar_file_sha256 = sha256_sum(format!("./lc/{0}", server_plugin.tar_name).as_str());
+        let downloaded_plugin_tar_file_sha256 = sha256_sum(&format!("./lc/{0}", server_plugin.tar_name));
         if downloaded_plugin_tar_file_sha256 != server_plugin.sha256 {
             panic!("Could not write {0} because of sha256sum discrepency:\nServer: {1}\nDownload: {2}\n", 
                 server_plugin.tar_name,
@@ -89,18 +86,15 @@ impl Grab {
 
         // Decompress and unpack the plugin archive 
         let dest: File = File::open(&plugin_tar_file)
-            .expect(format!("Could not open {0}", server_plugin.tar_name)
-            .as_str());
+            .expect(&format!("Could not open {0}", server_plugin.tar_name));
         let tar = GzDecoder::new(dest);
         let mut archive = Archive::new(tar);
         archive.unpack(format!("{0}/BepInEx/plugins", self.lc_path))
-            .expect(format!("Could not unpack {0}", server_plugin.tar_name)
-            .as_str());
+            .expect(&format!("Could not unpack {0}", server_plugin.tar_name));
 
         // Delete the archive
         remove_file(&plugin_tar_file)
-            .expect(format!("Could not remove {0}", server_plugin.tar_name)
-            .as_str());
+            .expect(&format!("Could not remove {0}", server_plugin.tar_name));
     }
 
     // Method used to sync the server's plugins with the client
@@ -126,11 +120,11 @@ impl Grab {
 
         // Convert the latest server plugins.json to plugins object 
         let server_plugins_str = read_to_string("./lc/plugins.json").expect("Can't read server plugins.json to string");
-        let server_plugins_temp: Plugins = serde_json::from_str(server_plugins_str.as_str()).expect("Could not serialize server plugins.json as Plugins");
+        let server_plugins_temp: Plugins = serde_json::from_str(&server_plugins_str).expect("Could not serialize server plugins.json as Plugins");
         self.plugins = server_plugins_temp;
 
         // If, for some reason, plugins doesn't exist, then create it
-        if !path_exists(format!("{0}/BepInEx/plugins", &self.lc_path).as_str()) {
+        if !path_exists(&format!("{0}/BepInEx/plugins", &self.lc_path)) {
             create_dir(format!("{0}/BepInEx/plugins", &self.lc_path)).expect("Could not create plugins")
         }
 
@@ -141,9 +135,9 @@ impl Grab {
             create_dir(format!("{0}/BepInEx/plugins", self.lc_path)).expect("Could not create plugins in wipe")
         }
 
-        if path_exists(format!("{0}/BepInEx/plugins/plugins.json", self.lc_path).as_str()) {
+        if path_exists(&format!("{0}/BepInEx/plugins/plugins.json", self.lc_path)) {
             let client_plugins_str = read_to_string(format!("{0}/BepInEx/plugins/plugins.json", self.lc_path)).expect("Can't read client plugins.json to string");
-            let client_plugins_temp: Plugins = serde_json::from_str(client_plugins_str.as_str()).expect("Could not serialize client plugins.json as Plugins");
+            let client_plugins_temp: Plugins = serde_json::from_str(&client_plugins_str).expect("Could not serialize client plugins.json as Plugins");
             let client_plugins = client_plugins_temp;
 
             let mut count: usize = 0;

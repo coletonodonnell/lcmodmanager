@@ -4,12 +4,19 @@ mod util;
 
 use crate::grab::*;
 use crate::steam::*;
-use crate::util::path_exists;
+use crate::util::{path_exists, uninstall, check_bepinex};
+use std::io::{stdin, stdout, Read, Write};
 use std::fs::create_dir;
 use clap::Parser;
 use core::panic;
 use dotenvy_macro::dotenv;
-use dotenvy::dotenv;
+
+fn exit() {
+    let mut stdout = stdout();
+    stdout.write(b"Success! Press enter to exit...").unwrap();
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
+}
 
 #[derive(Parser)]
 struct Cli {
@@ -25,6 +32,9 @@ struct Cli {
     #[arg(short = 'i', long, default_value_t = false)]
     wipe: bool,
 
+    #[arg(short, long, default_value_t = false)]
+    uninstall: bool,
+
     #[arg(long, default_value_t = ("").to_string())]
     lethal_company_path: String,
 
@@ -33,8 +43,6 @@ struct Cli {
 }
 
 fn main() {
-    dotenv().expect(".env file not found");
-
     let mut cli = Cli::parse();
 
     if !cli.steam_path.is_empty() && cli.flatpak {
@@ -68,6 +76,7 @@ fn main() {
 
     let lc_download = dotenv!("LCDOWNLOAD").to_string();
     let bepinex_download = dotenv!("BEPINEXDOWNLOAD").to_string();
+    let bepinex_sha256 = dotenv!("BEPINEXSHA256").to_string();
 
     // If this 
     if !path_exists("./lc") {
@@ -92,6 +101,7 @@ fn main() {
         steam = Steam { lc_path: lc_path.clone(), 
                         run_command: run_command, 
                         bepinex_download: bepinex_download,
+                        bepinex_sha256: bepinex_sha256,
                         flatpak: cli.flatpak
                     }
     }
@@ -110,6 +120,7 @@ fn main() {
         steam = Steam { lc_path: lc_path.clone(), 
                         run_command: run_command, 
                         bepinex_download: bepinex_download,
+                        bepinex_sha256: bepinex_sha256,
                         flatpak: cli.flatpak
                     }
     }
@@ -128,13 +139,20 @@ fn main() {
         steam = Steam { lc_path: lc_path.clone(),
                         run_command: run_command,
                         bepinex_download: bepinex_download,
+                        bepinex_sha256: bepinex_sha256,
                         flatpak: cli.flatpak
                     }
     }
 
-    // Check for BepInEx install at LC PATH, if it isn't there, install BepInEx to this machine
-    if !steam.check_bepinex() { steam.install_bepinex(); }
+    if cli.uninstall {
+        uninstall(&lc_path);
+    } else {
+        // Check for BepInEx install at LC PATH, if it isn't there, install BepInEx to this machine
+        if !check_bepinex(&lc_path) { steam.install_bepinex(); }
 
-    let mut grabber = Grab{ lc_download: lc_download, plugins: vec![], lc_path: lc_path, wipe: cli.wipe };
-    grabber.update();
+        let mut grabber = Grab{ lc_download: lc_download, plugins: vec![], lc_path: lc_path, wipe: cli.wipe };
+        grabber.update();
+    }
+
+    exit();
 }
