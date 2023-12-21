@@ -7,6 +7,7 @@ use crate::steam::*;
 use crate::util::{path_exists, uninstall, check_bepinex};
 use std::io::{stdin, stdout, Read, Write};
 use std::fs::create_dir;
+use anyhow::{Result, Ok};
 use clap::Parser;
 use core::panic;
 use dotenvy_macro::dotenv;
@@ -42,7 +43,7 @@ struct Cli {
     steam_path: String,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let mut cli = Cli::parse();
 
     if !cli.steam_path.is_empty() && cli.flatpak {
@@ -72,13 +73,13 @@ fn main() {
         } else {
             cli.linux = true;
         }
-    } 
+    }
 
     let lc_download = dotenv!("LCDOWNLOAD").to_string();
     let bepinex_download = dotenv!("BEPINEXDOWNLOAD").to_string();
     let bepinex_sha256 = dotenv!("BEPINEXSHA256").to_string();
 
-    // If this 
+    // If lc doesn't exist, create it.
     if !path_exists("./lc") {
         create_dir("./lc").expect("Could not create ./lc");
     }
@@ -145,14 +146,16 @@ fn main() {
     }
 
     if cli.uninstall {
-        uninstall(&lc_path);
+        uninstall(&lc_path)?;
     } else {
         // Check for BepInEx install at LC PATH, if it isn't there, install BepInEx to this machine
-        if !check_bepinex(&lc_path) { steam.install_bepinex(); }
+        if !check_bepinex(&lc_path) { steam.install_bepinex()?; }
 
         let mut grabber = Grab{ lc_download: lc_download, plugins: vec![], lc_path: lc_path, wipe: cli.wipe };
-        grabber.update();
+        grabber.update()?;
     }
 
     exit();
+
+    Ok(())
 }
