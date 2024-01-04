@@ -1,5 +1,5 @@
 # lcmodmanager
-A centralized mod manager for Lethal Comapny that manages plugins via a remote server and syncs them with a client, as well as install BepInEx.
+A centralized mod manager for Lethal Company that manages plugins via a remote server and syncs them with a client, as well as install BepInEx.
 
 ## Rationale
 
