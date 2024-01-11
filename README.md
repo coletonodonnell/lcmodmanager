@@ -45,29 +45,35 @@ In this example, two plugins are in this path, as well as `BepInEx.tar.gz` for B
 ```json
 [
   {
-    "tar_name": "LateCompany.tar.gz",
-    "version": "1.0.6",
-    "dll_name": "LateCompany.dll",
-    "folders": null,
-    "sha256": "e6dd667b2ba011e9dfd7373762f6cb37a1a4719d153dbc59d7cad2df011665b1"
+    "identifier": "AdditionalSuits",
+    "sha256": "4541a331b05b9e0cb55ce71ea1618b3facab40fc44f6c32560a9f290b6474c48",
+    "version": "1.1.3",
+    "tar_name": "AdditionalSuits.tar.gz",
+    "files": ["AdditionalSuits.dll"],
+    "folders": ["resAdditionalSuits"],
+    "root": false
   },
   {
-    "tar_name": "MoreCompany.tar.gz",
-    "version": "1.7.2",
-    "dll_name": "MoreCompany.dll",
-    "folders": ["MoreCompanyCosmetics"],
-    "sha256": "54d6413de5848fff9d65aa5c17c4a49c260f1f961f2a62c292a14623f7bac973"
-  }
+    "identifier": "HookGenPatcher",
+    "sha256": "b3a6c36d3beafdc5c2c3537d12fc95d4b73662f69cee89080847ed5803a0e04b",
+    "version": "0.0.5",
+    "tar_name": "HookGenPatcher.tar.gz",
+    "files": null,
+    "folders": ["config", "patchers"],
+    "root": true
+  },
 ]
 ```
 
 Here we see the things that must be specified:
 
-* `tar_name`: The name of the tar archive that will be downloaded.
-* `version`: The current version of the mod/plugin.
-* `dll_name`: All plugins utilize dll files, point to that main dll.
-* `folders`: An array of folders within the tar archive, in the event that there is no folders (which is common) just set this to null.
+* `identifier`: The name of the plugin that will be downloaded.
 * `sha256`: This is the lowercase checksum for the tar archive. You can get this with `sha256sum`.
+* `version`: The current version of the mod/plugin.
+* `tar_name`: The name of the tar archive.
+* `files`: An array of files that the plugins use in the parent directory, this could be anything from DLL files to configs. Can be null.
+* `folders`: An array of folders within the tar archive, in the event that there is no folders (which is common) just set this to null.
+* `root`: When `true`, install to `BepInEx/`, when `false`, install to `BepInEx/plugins`.
 
 Finally, `plugins.sha256` is the checksum of the `plugins.json`. Whenever the client grabs `plugins.json`, they will verify that the checksums match before proceeding. The idea behind this is that there is now a low risk for possible transfer issues.
 
