@@ -58,10 +58,10 @@ In this example, two plugins are in this path, as well as `BepInEx.tar.gz` for B
     "sha256": "b3a6c36d3beafdc5c2c3537d12fc95d4b73662f69cee89080847ed5803a0e04b",
     "version": "0.0.5",
     "tar_name": "HookGenPatcher.tar.gz",
-    "files": null,
-    "folders": ["config", "patchers"],
+    "files": ["config/HookGenPatcher.cfg"],
+    "folders": ["patchers/BepInEx.MonoMod.HookGenPatcher"],
     "root": true
-  },
+  }
 ]
 ```
 
@@ -73,7 +73,7 @@ Here we see the things that must be specified:
 * `tar_name`: The name of the tar archive.
 * `files`: An array of files that the plugins use in the parent directory, this could be anything from DLL files to configs. Can be null.
 * `folders`: An array of folders within the tar archive, in the event that there is no folders (which is common) just set this to null.
-* `root`: When `true`, install to `BepInEx/`, when `false`, install to `BepInEx/plugins`.
+* `root`: When `true`, install to `BepInEx/`, when `false`, install to `BepInEx/plugins`. **Note: whenever you are using the root option, ensure that you are using full paths to files that are commonly shared with BepInEx.** In the example above `HookGenPatcher` installs to `BepInEx/config` and `BepInEx/patchers`, which are both common (e.g. installed with BepInEx.) This could mean that, whenever being removed, if you just declared `config` and `patchers`, lcmodmanager would delete these. Ensure you are using full paths as described above whenever this is the case.
 
 Finally, `plugins.sha256` is the checksum of the `plugins.json`. Whenever the client grabs `plugins.json`, they will verify that the checksums match before proceeding. The idea behind this is that there is now a low risk for possible transfer issues.
 
