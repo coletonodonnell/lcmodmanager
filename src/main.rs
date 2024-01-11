@@ -151,7 +151,7 @@ fn main() -> Result<()> {
         // Check for BepInEx install at LC PATH, if it isn't there, install BepInEx to this machine
         if !check_bepinex(&lc_path) { steam.install_bepinex()?; }
 
-        let mut grabber = Grab{ lc_download: lc_download, plugins: vec![], lc_path: lc_path, wipe: cli.wipe };
+        let mut grabber = Grab{ lc_download: lc_download, plugins: vec![], lc_path: lc_path, wipe: cli.wipe, steam: steam };
         grabber.update()?;
     }
 
